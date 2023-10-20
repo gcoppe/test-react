@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Layout, Space } from "antd";
 import Welcome from "./Welcome/Welcome";
+import { PlayerDetails } from "./Welcome/Welcome";
 import "./index.css";
 
 const { Header, Content } = Layout;
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
     path: "/",
     element: <Welcome />,
   },
+  {
+    path: "/player/:id",
+    element: <PlayerDetails />
+  }
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

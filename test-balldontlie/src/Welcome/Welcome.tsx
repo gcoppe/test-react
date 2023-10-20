@@ -1,5 +1,6 @@
 import { Table } from 'antd';
 import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 type Nullable<T> = T | null;
 
@@ -35,23 +36,23 @@ export interface Players {
   }
 
 
-const Player= ({player}) => {
-    //  ID, first name, position, team name
-    return (
-        <li key={player.id}>{player?.id} {player?.first_name} {player?.position} {player?.team?.name}</li>
-    )
-}
+// const Player= ({player}) => {
+//     //  ID, first name, position, team name
+//     return (
+//         <li key={player.id}>{player?.id} {player?.first_name} {player?.position} {player?.team?.name}</li>
+//     )
+// }
 
-const Players = ({players}) => {
-    return (
-        <ul>
-            {players.map((player:Player) =>
-                <Player player={player}></Player>
-            )
-            }
-        </ul>
-    )
-}
+// const Players = ({players}) => {
+//     return (
+//         <ul>
+//             {players.map((player:Player) =>
+//                 <Player player={player}></Player>
+//             )
+//             }
+//         </ul>
+//     )
+// }
 function getPlayers(): Promise<Players>{
     return  fetch('/api/players?per_page=100').then((response) =>
         {
@@ -59,6 +60,34 @@ function getPlayers(): Promise<Players>{
         });
 }
 
+
+export const PlayerDetails = () => {
+
+    const { id } = useParams();
+
+    console.log(id);
+
+    const [player, setPlayer] = useState<Player>();
+
+    useEffect(() => {
+        fetch(`/api/players/${id}`)
+        .then((response)=>response.json())
+        .then((player: Player) => {
+            console.log(player);
+            setPlayer(player);
+        })
+    }, []);
+
+    return (
+        <ul>
+            {/* <li>{JSON.stringify(player)}</li> */}
+            <li>{player?.id}</li>
+            <li>{player?.first_name} {player?.last_name}</li>
+            <li>{player?.team.full_name}</li>
+        </ul>
+    )
+
+}
 
 
 
@@ -69,7 +98,17 @@ const Welcome = () => {
 
     const [dataSource, setDataSource] = useState<any>();
     const columns = [
-        { title: 'id', dataIndex: 'id', key: 'id' },
+        { title: 'id', dataIndex: 'id', key: 'id', render: (value) => {
+            return (
+              <a
+                onClick={(event) => event.stopPropagation()}
+                href={'/player/' + value}
+              >
+                {value}
+              </a>
+            );
+            }
+        },
         { title: 'First Name', dataIndex: 'first_name', key: 'first_name' },
         { title: 'Position', dataIndex:'position', key: 'position' },
         { title: 'Team', dataIndex: 'team', key: 'team' },
@@ -89,7 +128,16 @@ const Welcome = () => {
     return (
         <div style={{background: 'white'}}>
         {dataSource &&
-            <Table dataSource={dataSource} columns={columns}>
+            <Table
+            rowKey={(record) => record.id}
+            onRow={(record) => ({
+                onClick: (e) => {
+                    // redirect to player's details page
+                    window.location.href = `/player/${record.id}`;
+                  },
+                })}
+            dataSource={dataSource}
+            columns={columns}>
             </Table>
         }
         </div>
